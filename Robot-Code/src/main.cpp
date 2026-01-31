@@ -1,15 +1,14 @@
 #include <Arduino.h>
+#include <HCSR04.h>
 
-// put function declarations here:
-int myFunction(int, int);
+UltraSonicDistanceSensor distanceSensor(9, 10);  // trigger, echo
 
 void setup() {
-  // put your setup code here, to run once:
+    Serial.begin(9600);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  Serial.begin(9600);
-  Serial.println("Hello, World!");
-  delay(1000);
+    long distance = distanceSensor.measureDistanceCm();
+    Serial.println(distance);
+    delay(100);
 }
