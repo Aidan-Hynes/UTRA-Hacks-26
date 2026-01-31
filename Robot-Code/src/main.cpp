@@ -1,19 +1,17 @@
 #include <Arduino.h>
-#include <HCSR04.h>
-#include <MD_TCS230.h>
-#include <FreqCount.h>
-#include "colour_sensing.h"
+#include <Motor.h>
 
-#define S0 4
-#define S1 8
-#define S2 6
-#define S3 7
-#define OE 3    // LOW = ENABLED 
-#define TCS_OUT 5 // TCS230 OUT must be on pin 5 for FreqCount on UNO
+// Definitions Arduino pins connected to input H Bridge
+int IN1 = 4;
+int IN2 = 5;
+int IN3 = 6;
+int IN4 = 7;
+int speed = 255; // Speed value between 0 and 255
 
-//UltraSonicDistanceSensor distanceSensor(9, 10);  // trigger, echo
+Motor motor(IN1, IN2, IN3, IN4); // Create motor object
 
-void setup() {
+void setup()
+{
     Serial.begin(9600);
     Serial.println("[TCS230 Simple BLOCKING Example]");
     
@@ -26,7 +24,33 @@ void setup() {
     colourSensor.setSampling(10);
 }
 
-void loop() {
-    readSensor();
-    delay(1000);
+void loop()
+{
+    String readString = "";
+  // Check if any data is available to read from the serial port
+    while (Serial.available()) {
+        // Read characters into a String until the buffer is empty
+        char c = Serial.read();
+        readString += c;
+        delay(2); // Small delay to allow the buffer to fill
+    }
+    if (readString.length() == 0) {
+        return; // No data read
+    }
+    Serial.println("Received: " + readString);
+    if (readString == "S") {
+        motor.stop(); // Stop the motor
+    }
+    else if (readString == "F") {
+        // Move Forward
+        motor.drive(true, speed);
+    }
+    else if (readString == "B") {
+        // Move Backward
+        motor.drive(false, speed);
+    }
+    else if ((readString != String(speed)) && (readString.toInt() >= 0) && (readString.toInt() <= 255)) {
+        // Update speed value
+        speed = readString.toInt();
+    }
 }
