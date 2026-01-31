@@ -18,7 +18,7 @@ export async function POST(req: Request) {
 
         // Context for the Hackathon / Robot
         const systemPrompt = `
-      You are 'Aerya', the advanced tactical AI for the UTRA Hacks Biathlon Robot.
+      You are 'WinterOps AI', the advanced tactical AI for the UTRA Hacks Biathlon Robot.
       Your goal is to assist the pilot in winning the Winter Olympics themed robotics challenge.
       
       THE CHALLENGE DATA:
@@ -41,7 +41,7 @@ export async function POST(req: Request) {
                 },
                 {
                     role: "model",
-                    parts: [{ text: "Systems online. Aerya Tactical AI ready. Awaiting command parameters." }]
+                    parts: [{ text: "Systems online. WinterOps Tactical AI ready. Awaiting command parameters." }]
                 }
             ]
         });
