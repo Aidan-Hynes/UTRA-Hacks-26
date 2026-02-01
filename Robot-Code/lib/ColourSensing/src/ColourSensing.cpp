@@ -9,10 +9,7 @@ static const ColourSensing::ColourRef colourRefs[] = {
     {ColourSensing::COLOUR_BLACK, 0.34f, 0.33f, 0.33f },
     {ColourSensing::COLOUR_RED,     0.40f, 0.30f, 0.30f},
     {ColourSensing::COLOUR_GREEN,   0.30f, 0.40f, 0.30f},
-    {ColourSensing::COLOUR_BLUE,    0.30f, 0.30f, 0.40f},
-    {ColourSensing::COLOUR_YELLOW,  0.45f, 0.45f, 0.10f},
-    {ColourSensing::COLOUR_CYAN,    0.15f, 0.45f, 0.45f},
-    {ColourSensing::COLOUR_MAGENTA, 0.45f, 0.15f, 0.45f}
+    {ColourSensing::COLOUR_BLUE,    0.30f, 0.30f, 0.40f}
 };
 
 static const int NUM_COLOURS =
