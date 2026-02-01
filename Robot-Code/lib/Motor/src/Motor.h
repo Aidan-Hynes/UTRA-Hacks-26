@@ -9,6 +9,8 @@ public:
     void move_motor2(bool forward, int speed);
     void stop_motor2();
     void drive(bool forward, int speed);
+    void turnLeft90();
+    void turnRight90();
     void stop();
 private:
     int _in1Pin;

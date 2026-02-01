@@ -10,8 +10,8 @@ Motor::Motor(int in1Pin, int in2Pin, int in3Pin, int in4Pin)
     pinMode(_in4Pin, OUTPUT);
 }
 
-void Motor::move_motor1(bool forward, int speed) {
-    if (forward) {
+void Motor::move_motor1(bool backward, int speed) {
+    if (backward) {
         analogWrite(_in1Pin, speed);
         analogWrite(_in2Pin, LOW);
     } else {
@@ -25,8 +25,8 @@ void Motor::stop_motor1() {
     analogWrite(_in2Pin, LOW);
 }
 
-void Motor::move_motor2(bool forward, int speed) {
-    if (forward) {
+void Motor::move_motor2(bool backward, int speed) {
+    if (backward) {
         analogWrite(_in3Pin, speed);
         analogWrite(_in4Pin, LOW);
     } else {
@@ -40,12 +40,28 @@ void Motor::stop_motor2() {
     analogWrite(_in4Pin, LOW);
 }
 
-void Motor::drive(bool forward, int speed) {
-    move_motor1(forward, speed);
-    move_motor2(forward, speed);
+void Motor::drive(bool backward, int speed) {
+    move_motor1(backward, speed);
+    move_motor2(backward, speed);
 }
 
 void Motor::stop() {
+    stop_motor1();
+    stop_motor2();
+}
+
+void Motor::turnLeft90() {
+    move_motor1(false, 255);
+    move_motor2(true, 255);
+    delay(2250); // Adjust this delay to achieve a 90-degree turn
+    stop_motor1();
+    stop_motor2();
+}
+
+void Motor::turnRight90() {
+    move_motor1(true, 255);
+    move_motor2(false, 255);
+    delay(2250); // Adjust this delay to achieve a 90-degree turn
     stop_motor1();
     stop_motor2();
 }
