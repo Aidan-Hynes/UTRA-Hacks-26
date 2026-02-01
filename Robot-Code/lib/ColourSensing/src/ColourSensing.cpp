@@ -65,7 +65,7 @@ void ColourSensing::auto_calibrate(unsigned long durationMs) {
     Serial.print("B: "); Serial.print(blueMin); Serial.print(" - "); Serial.println(blueMax);
 }
 
-void ColourSensing::readSensor(int *r, int *g, int *b) {
+void ColourSensing::readSensor(rgb &colour) {
     // Read Red
     digitalWrite(s2Pin, LOW);
     digitalWrite(s3Pin, LOW);
@@ -92,8 +92,8 @@ void ColourSensing::readSensor(int *r, int *g, int *b) {
     Serial.print("R= "); Serial.print(redPercent); Serial.print("% ");
     Serial.print("G= "); Serial.print(greenPercent); Serial.print("% ");
     Serial.print("B= "); Serial.print(bluePercent); Serial.println("%");
-
-    *r = redPercent;
-    *g = greenPercent;
-    *b = bluePercent;
+    
+    colour.r = redPercent;
+    colour.g = greenPercent;
+    colour.b = bluePercent;
 }

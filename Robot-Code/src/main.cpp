@@ -21,7 +21,23 @@ const int motor1Pin2 = 6;
 const int motor2Pin1 = 9;
 const int motor2Pin2 = 10;
 
+ColourSensing colourSensor(s0, s1, s2, s3, ColourOutPin);
 
-void setup() {}
+void setup() {
+    Serial.begin(9600);
+    while(!Serial);
+    Serial.println("Robot Initialized");
+    colourSensor.auto_calibrate(5000); // Calibrate for 10 seconds
+}
 
-void loop() {}
+void loop() {
+    ColourSensing::rgb color;
+    colourSensor.readSensor(color);
+    Serial.print("R: ");
+    Serial.print(color.r);
+    Serial.print(" G: ");
+    Serial.print(color.g);
+    Serial.print(" B: ");
+    Serial.println(color.b);
+    delay(500);
+}

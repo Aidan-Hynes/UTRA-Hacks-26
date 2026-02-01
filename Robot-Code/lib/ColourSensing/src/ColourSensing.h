@@ -4,8 +4,13 @@
 class ColourSensing {
 public:
     ColourSensing(int s0Pin, int s1Pin, int s2Pin, int s3Pin, int outPin);
+    typedef struct {
+        int r;
+        int g;
+        int b;
+    } rgb;
     void auto_calibrate(unsigned long durationMs);
-    void readSensor(int *r, int *g, int *b);
+    void readSensor(rgb &colour);
 private:
     int s0Pin;
     int s1Pin;
