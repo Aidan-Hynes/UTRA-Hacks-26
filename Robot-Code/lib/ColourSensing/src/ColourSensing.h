@@ -15,12 +15,12 @@ private:
     int redValue;
     int greenValue;
     int blueValue;
-    long redMin;
-    long redMax;
-    long greenMin;
-    long greenMax;
-    long blueMin;
-    long blueMax;
+    unsigned long redMin;
+    unsigned long redMax;
+    unsigned long greenMin;
+    unsigned long greenMax;
+    unsigned long blueMin;
+    unsigned long blueMax;
     int redPercent;
     int greenPercent;
     int bluePercent;

@@ -1,9 +1,16 @@
 #include <Arduino.h>
+#include <limits.h>
 #include "ColourSensing.h"
 
 
 ColourSensing::ColourSensing(int s0Pin, int s1Pin, int s2Pin, int s3Pin, int outPin)
 {
+    this->s0Pin = s0Pin;
+    this->s1Pin = s1Pin;
+    this->s2Pin = s2Pin;
+    this->s3Pin = s3Pin;
+    this->outPin = outPin;
+
     pinMode(s0Pin, OUTPUT);
     pinMode(s1Pin, OUTPUT);
     pinMode(s2Pin, OUTPUT);
@@ -14,14 +21,13 @@ ColourSensing::ColourSensing(int s0Pin, int s1Pin, int s2Pin, int s3Pin, int out
     digitalWrite(s0Pin, HIGH);
     digitalWrite(s1Pin, LOW);
 
-    redMin = 100000, redMax = 0;
-    greenMin = 100000, greenMax = 0;
-    blueMin = 100000, blueMax = 0;
+    redMin = ULONG_MAX; redMax = 0;
+    greenMin = ULONG_MAX; greenMax = 0;
+    blueMin = ULONG_MAX; blueMax = 0;
 
     redPercent = 0;
     greenPercent = 0;
     bluePercent = 0;
-
 }
 
 void ColourSensing::auto_calibrate(unsigned long durationMs) {
