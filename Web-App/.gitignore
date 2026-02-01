@@ -28,3 +28,7 @@ ts-debug.log*
 
 # vercel
 .vercel
+
+snowflake.log
+
+package-lock.json
