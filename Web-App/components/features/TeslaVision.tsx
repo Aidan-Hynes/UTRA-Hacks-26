@@ -477,12 +477,13 @@ export default function TeslaVision({ isMatchActive, onLog, onArchive }: TeslaVi
                         <div className="absolute top-0 bottom-0 right-2 w-0.5 bg-white/20"></div>
                     </div>
 
-                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 transform scale-75">
-                        <div className="w-14 h-20 bg-gray-200 rounded-xl shadow-2xl relative border border-white/50">
-                            <div className="absolute top-2 left-2 right-2 h-8 bg-gray-800 rounded-md opacity-80"></div>
-                            <div className="absolute bottom-1 left-1 w-1.5 h-2.5 bg-red-500 rounded-sm shadow-[0_0_5px_red]"></div>
-                            <div className="absolute bottom-1 right-1 w-1.5 h-2.5 bg-red-500 rounded-sm shadow-[0_0_5px_red]"></div>
-                        </div>
+                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2">
+                        {/* Realistic Car Asset */}
+                        <img
+                            src="/rover.png"
+                            alt="Rover"
+                            className="w-20 h-auto drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] opacity-100"
+                        />
                     </div>
                 </div>
             </div>
