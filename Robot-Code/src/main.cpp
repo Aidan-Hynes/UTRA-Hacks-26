@@ -1,11 +1,11 @@
 #include <Arduino.h>
-#include <Motor.h>
+#include "Motor.h"
 
 // Definitions Arduino pins connected to input H Bridge
-int IN1 = 4;
-int IN2 = 5;
-int IN3 = 6;
-int IN4 = 7;
+int IN1 = 9;
+int IN2 = 10;
+int IN3 = 5;
+int IN4 = 6;
 int speed = 255; // Speed value between 0 and 255
 
 Motor motor(IN1, IN2, IN3, IN4); // Create motor object
@@ -34,7 +34,7 @@ void loop()
     }
     else if (readString == "F") {
         // Move Forward
-        motor.drive(true, speed);
+       motor.drive(true, speed);
     }
     else if (readString == "B") {
         // Move Backward

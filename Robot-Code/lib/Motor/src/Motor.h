@@ -10,6 +10,11 @@ public:
     void stop_motor2();
     void drive(bool forward, int speed);
     void stop();
+private:
+    int _in1Pin;
+    int _in2Pin;
+    int _in3Pin;
+    int _in4Pin;
 };
 
 
