@@ -3,6 +3,20 @@
 #include "ColourSensing.h"
 
 
+static const ColourSensing::ColourRef colourRefs[] = {
+    {ColourSensing::COLOUR_WHITE, 0.34f, 0.33f, 0.33f },
+    {ColourSensing::COLOUR_GRAY, 0.34f, 0.33f, 0.33f },
+    {ColourSensing::COLOUR_BLACK, 0.34f, 0.33f, 0.33f },
+    {ColourSensing::COLOUR_RED,     0.40f, 0.30f, 0.30f},
+    {ColourSensing::COLOUR_GREEN,   0.30f, 0.40f, 0.30f},
+    {ColourSensing::COLOUR_BLUE,    0.30f, 0.30f, 0.40f},
+    {ColourSensing::COLOUR_YELLOW,  0.45f, 0.45f, 0.10f},
+    {ColourSensing::COLOUR_CYAN,    0.15f, 0.45f, 0.45f},
+    {ColourSensing::COLOUR_MAGENTA, 0.45f, 0.15f, 0.45f}
+};
+
+static const int NUM_COLOURS =
+    sizeof(colourRefs) / sizeof(colourRefs[0]);
 ColourSensing::ColourSensing(int s0Pin, int s1Pin, int s2Pin, int s3Pin, int outPin)
 {
     this->s0Pin = s0Pin;
@@ -96,4 +110,60 @@ void ColourSensing::readSensor(rgb &colour) {
     colour.r = redPercent;
     colour.g = greenPercent;
     colour.b = bluePercent;
+}
+
+static float colorDistance(float r1, float g1, float b1, float r2, float g2, float b2) {
+    return sqrt(
+    sq(r1 - r2) +
+    sq(g1 - g2) +
+    sq(b1 - b2)
+    );
+}
+
+ColourSensing::DetectedColour ColourSensing::getClosestColour(const rgb &colour, float &distance) {
+    int sum = colour.r + colour.g + colour.b;
+
+    // ---- Brightness gating (objective) ----
+    if (sum < 10) {
+        distance = 0.0f;
+        return COLOUR_BLACK;
+    }
+
+    if (sum < 40) {
+        distance = 0.0f;
+        return COLOUR_GRAY;
+    }
+
+    // ---- Normalize RGB ----
+    float rn = (float)colour.r / sum;
+    float gn = (float)colour.g / sum;
+    float bn = (float)colour.b / sum;
+    Serial.print("Normalized RGB: ");
+    Serial.print(rn, 4); Serial.print(", ");
+    Serial.print(gn, 4); Serial.print(", ");
+    Serial.println(bn, 4);
+    float minDist = 999.0f;
+    DetectedColour best = COLOUR_UNKNOWN;
+
+    // ---- Distance-based classification ----
+    for (int i = 0; i < NUM_COLOURS; i++) {
+        float d = sqrt(
+            sq(rn - colourRefs[i].r) +
+            sq(gn - colourRefs[i].g) +
+            sq(bn - colourRefs[i].b)
+        );
+
+        if (d < minDist) {
+            minDist = d;
+            best = colourRefs[i].colour;
+        }
+    }
+
+    distance = minDist;
+
+    // ---- Confidence gate ----
+    if (minDist > 0.35f)
+        return COLOUR_UNKNOWN;
+
+    return best;
 }
