@@ -15,9 +15,11 @@ type DetectedObject = {
 
 interface TeslaVisionProps {
     isMatchActive: boolean;
+    onLog?: (message: string) => void;
+    onArchive?: (data: { filename: string, url: string }) => void;
 }
 
-export default function TeslaVision({ isMatchActive }: TeslaVisionProps) {
+export default function TeslaVision({ isMatchActive, onLog, onArchive }: TeslaVisionProps) {
     const [isPlaying, setIsPlaying] = useState(false);
     const [activeNavColor, setActiveNavColor] = useState<string | null>(null);
     const [activeNavAngle, setActiveNavAngle] = useState(0);
@@ -28,6 +30,11 @@ export default function TeslaVision({ isMatchActive }: TeslaVisionProps) {
     const [targetVisible, setTargetVisible] = useState(false);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [isSpeaking, setIsSpeaking] = useState(false);
+    const [isRecording, setIsRecording] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
+    const [offPathCount, setOffPathCount] = useState(0);
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const chunksRef = useRef<Blob[]>([]);
 
     const videoRef = useRef<HTMLImageElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -57,6 +64,90 @@ export default function TeslaVision({ isMatchActive }: TeslaVisionProps) {
 
         return () => clearInterval(analyzeInterval);
     }, [isMatchActive, isPlaying]);
+
+    // [STEP 4] RECORDING LOGIC
+    useEffect(() => {
+        if (isMatchActive) {
+            setOffPathCount(0); // Reset count on new match
+            startRecording();
+        } else {
+            stopRecordingAndUpload();
+        }
+    }, [isMatchActive]);
+
+    const startRecording = () => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        try {
+            // Capture canvas stream (30FPS)
+            const stream = canvas.captureStream(30);
+            const mediaRecorder = new MediaRecorder(stream, {
+                mimeType: "video/webm;codecs=vp9"
+            });
+
+            mediaRecorderRef.current = mediaRecorder;
+            chunksRef.current = [];
+
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    chunksRef.current.push(event.data);
+                }
+            };
+
+            mediaRecorder.start();
+            setIsRecording(true);
+            console.log("🎥 Recording Started");
+
+        } catch (e) {
+            console.error("Failed to start recording:", e);
+        }
+    };
+
+    const stopRecordingAndUpload = async () => {
+        if (!mediaRecorderRef.current || mediaRecorderRef.current.state === "inactive") return;
+
+        mediaRecorderRef.current.stop();
+        setIsRecording(false);
+        console.log("🎥 Recording Stopped, processing...");
+
+        // Wait a bit for the last chunk
+        setTimeout(async () => {
+            const blob = new Blob(chunksRef.current, { type: "video/webm" });
+            if (blob.size === 0) return;
+
+            // Pass the current offPathCount to upload
+            await uploadVideo(blob, offPathCount);
+        }, 500);
+    };
+
+    const uploadVideo = async (videoBlob: Blob, finalOffPathCount: number) => {
+        setIsUploading(true);
+        const formData = new FormData();
+        formData.append("file", videoBlob, "match_recording.webm");
+        formData.append("offPathCount", finalOffPathCount.toString());
+
+        try {
+            const res = await fetch("/api/archive/upload", {
+                method: "POST",
+                body: formData,
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                console.log("✅ Video Archived to Snowflake:", data.filename);
+                // if (onLog) onLog(`[ARCHIVE] Video saved: ${data.playbackUrl || data.filename}`); // Removed as per user request
+                if (onArchive) onArchive({ filename: data.filename, url: data.playbackUrl || "" });
+                // Optional: Play a sound or show a notification
+            } else {
+                console.error("Upload Failed:", data.error);
+            }
+        } catch (e) {
+            console.error("Upload Error:", e);
+        } finally {
+            setIsUploading(false);
+        }
+    };
 
     // [STEP 3] VOICE INTEGRATION
     useEffect(() => {
@@ -125,6 +216,12 @@ export default function TeslaVision({ isMatchActive }: TeslaVisionProps) {
 
             if (data.status) {
                 setGeminiStatus(data.status);
+
+                // Increment Off-Path Count
+                if (data.status === 'off_track' || data.status === 'drifting_left' || data.status === 'drifting_right') {
+                    setOffPathCount(prev => prev + 1);
+                }
+
                 setLastCue(data.commentary_cue);
                 setTargetVisible(data.target_visible);
                 console.log("Ref says:", data);
@@ -305,6 +402,22 @@ export default function TeslaVision({ isMatchActive }: TeslaVisionProps) {
                             <div className="flex items-center gap-2 px-2 py-0.5 rounded border border-purple-500/30 bg-purple-500/10 backdrop-blur-md">
                                 <Volume2 className="w-3 h-3 text-purple-400 animate-pulse" />
                                 <span className="text-[10px] font-mono text-purple-300">SPEAKING...</span>
+                            </div>
+                        )}
+
+                        {/* RECORDING INDICATOR */}
+                        {isRecording && (
+                            <div className="flex items-center gap-2 px-2 py-0.5 rounded border border-red-500/30 bg-red-500/10 backdrop-blur-md">
+                                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_5px_red]"></div>
+                                <span className="text-[10px] font-mono text-red-300">REC</span>
+                            </div>
+                        )}
+
+                        {/* UPLOADING INDICATOR */}
+                        {isUploading && (
+                            <div className="flex items-center gap-2 px-2 py-0.5 rounded border border-blue-500/30 bg-blue-500/10 backdrop-blur-md">
+                                <div className="animate-bounce text-[10px]">☁️</div>
+                                <span className="text-[10px] font-mono text-blue-300">ARCHIVING...</span>
                             </div>
                         )}
 

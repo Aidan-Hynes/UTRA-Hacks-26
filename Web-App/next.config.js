@@ -8,6 +8,9 @@ const nextConfig = {
                 hostname: '192.168.38.209',
             }
         ]
+    },
+    experimental: {
+        serverComponentsExternalPackages: ['snowflake-sdk'],
     }
 }
 
