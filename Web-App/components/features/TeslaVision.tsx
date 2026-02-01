@@ -13,22 +13,110 @@ type DetectedObject = {
     angle: number;
 };
 
-export default function TeslaVision() {
+interface TeslaVisionProps {
+    isMatchActive: boolean;
+}
+
+export default function TeslaVision({ isMatchActive }: TeslaVisionProps) {
     const [isPlaying, setIsPlaying] = useState(false);
     const [activeNavColor, setActiveNavColor] = useState<string | null>(null);
     const [activeNavAngle, setActiveNavAngle] = useState(0);
+
+    const [geminiStatus, setGeminiStatus] = useState<"on_track" | "drifting_left" | "drifting_right" | "off_track" | "idle" | "error">("idle");
+    const [lastCue, setLastCue] = useState<string>("");
+    // const [isMatchActive, setIsMatchActive] = useState(false); // PROPPED INSTEAD
+    const [targetVisible, setTargetVisible] = useState(false);
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
 
     const videoRef = useRef<HTMLImageElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     // Toggle Stream
-    const toggleStream = () => setIsPlaying(!isPlaying);
+    const toggleStream = () => {
+        if (isPlaying) {
+            setIsPlaying(false);
+        } else {
+            setIsPlaying(true);
+        }
+    };
 
     useEffect(() => {
         if (!isPlaying) return;
         const interval = setInterval(runDetection, DETECTION_INTERVAL_MS);
         return () => clearInterval(interval);
     }, [isPlaying]);
+
+    // GEMINI ANALYSIS LOOP
+    useEffect(() => {
+        if (!isMatchActive || !isPlaying) return;
+
+        const analyzeInterval = setInterval(async () => {
+            await analyzeFrame();
+        }, 15000); // 15 seconds
+
+        return () => clearInterval(analyzeInterval);
+    }, [isMatchActive, isPlaying]);
+
+    // [STEP 3 PLACEHOLDER] VOICE INTEGRATION
+    useEffect(() => {
+        if (!lastCue) return;
+
+        // TODO: Send 'lastCue' to ElevenLabs API
+        console.log("🔊 PLAYING AUDIO:", lastCue);
+
+        // Mock usage:
+        // playAudio(lastCue);
+    }, [lastCue]);
+
+    const analyzeFrame = async () => {
+        const img = videoRef.current;
+        const canvas = canvasRef.current;
+        if (!img || !canvas || !img.complete) return;
+
+        setIsAnalyzing(true); // START THINKING
+
+        // Draw current frame to get base64
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+            setIsAnalyzing(false);
+            return;
+        }
+
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const base64Image = canvas.toDataURL("image/jpeg", 0.6); // Compress quality
+
+        try {
+            const res = await fetch("/api/gemini/analyze", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ image: base64Image }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || `API Error: ${res.status}`);
+            }
+
+            if (data.status) {
+                setGeminiStatus(data.status);
+                setLastCue(data.commentary_cue);
+                setTargetVisible(data.target_visible);
+                console.log("Ref says:", data);
+            } else {
+                setGeminiStatus("error");
+                setLastCue("Invalid response from referee.");
+            }
+
+        } catch (err: any) {
+            console.error("Gemini Analysis Failed:", err);
+            setGeminiStatus("error");
+            // Show the actual error message if available
+            setLastCue(err.message || "Connection to referee lost.");
+        } finally {
+            setIsAnalyzing(false); // STOP THINKING
+        }
+    };
 
     // Helper: Convert RGB to HSV
     // Returns h [0-180], s [0-255], v [0-255]
@@ -163,19 +251,58 @@ export default function TeslaVision() {
                     </div>
                 </div>
 
-                <canvas ref={canvasRef} className="hidden" />
+                {/* VISUAL INDICATORS FOR GEMINI */}
+                {isMatchActive && (
+                    <div className="absolute top-3 right-3 flex flex-col gap-2 items-end">
+                        <div className={`flex items-center gap-2 px-2 py-1 rounded-full border border-white/10 backdrop-blur-md ${geminiStatus === 'on_track' ? 'bg-green-500/20 text-green-300' :
+                            geminiStatus === 'error' ? 'bg-red-900/40 text-red-500 border-red-500/50' :
+                                (geminiStatus === 'off_track' || geminiStatus.includes('drifting')) ? 'bg-red-500/20 text-red-300' :
+                                    'bg-yellow-500/20 text-yellow-300'
+                            }`}>
+                            <div className={`w-2 h-2 rounded-full ${geminiStatus === 'on_track' ? 'bg-green-500 animate-pulse' :
+                                geminiStatus === 'error' ? 'bg-red-500' :
+                                    (geminiStatus === 'off_track' || geminiStatus.includes('drifting')) ? 'bg-red-500 animate-ping' :
+                                        'bg-yellow-500'
+                                }`}></div>
+                            <span className="text-[10px] font-mono uppercase font-bold">{geminiStatus.replace('_', ' ')}</span>
+                        </div>
 
-                {!isPlaying && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-                        <button
-                            onClick={toggleStream}
-                            className="flex items-center gap-2 text-neonBlue hover:text-white transition-all text-xs tracking-widest border-b border-neonBlue pb-1 hover:border-white"
-                        >
-                            <Power className="w-3 h-3" />
-                            INIT_VISION_SYSTEM
-                        </button>
+                        {/* ANALYZING INDICATOR */}
+                        {isAnalyzing && (
+                            <div className="flex items-center gap-2 px-2 py-0.5 rounded border border-blue-500/30 bg-blue-500/10 backdrop-blur-md">
+                                <div className="animate-spin h-3 w-3 border-2 border-blue-400 border-t-transparent rounded-full"></div>
+                                <span className="text-[10px] font-mono text-blue-300">THINKING...</span>
+                            </div>
+                        )}
+
+                        {targetVisible && (
+                            <div className="px-2 py-0.5 bg-blue-500/20 border border-blue-500/30 text-blue-300 text-[10px] font-mono rounded">
+                                TARGET_LOCKED
+                            </div>
+                        )}
+
+                        {lastCue && (
+                            <div className="max-w-[200px] bg-black/50 backdrop-blur p-2 rounded border-l-2 border-neonBlue">
+                                <p className="text-[10px] text-gray-300 italic">"{lastCue}"</p>
+                            </div>
+                        )}
                     </div>
                 )}
+
+
+                <canvas ref={canvasRef} className="hidden" />
+
+                <div className="absolute bottom-5 left-0 right-0 flex justify-center gap-4">
+                    {!isPlaying && (
+                        <button
+                            onClick={toggleStream}
+                            className="flex items-center gap-2 px-6 py-2 bg-neonBlue/20 hover:bg-neonBlue/40 text-neonBlue border border-neonBlue rounded uppercase text-xs font-bold tracking-widest transition-all"
+                        >
+                            <Power className="w-4 h-4" />
+                            INIT_VISION_SYSTEM
+                        </button>
+                    )}
+                </div>
             </div>
 
             {/* RIGHT: Tesla-Style HUD */}

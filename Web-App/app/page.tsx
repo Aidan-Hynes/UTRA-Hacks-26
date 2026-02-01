@@ -75,7 +75,7 @@ export default function Home() {
                 {/* CENTER: Vision System */}
                 <div className="col-span-6 row-span-4 bg-black/40 border border-white/10 rounded-lg relative overflow-hidden group">
                     <div className="w-full h-full p-2">
-                        <TeslaVision />
+                        <TeslaVision isMatchActive={isMatchActive} />
                     </div>
                 </div>
 
