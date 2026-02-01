@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "Motor.h"
+#include "colour_sensing.h"
 
 // Definitions Arduino pins connected to input H Bridge
 int IN1 = 9;
@@ -17,6 +18,8 @@ void setup()
 
 void loop()
 {
+    ColourSensing colourSensor(4, 5, 6, 7, 8); // Example pin assignments
+
     String readString = "";
   // Check if any data is available to read from the serial port
     while (Serial.available()) {
@@ -43,5 +46,9 @@ void loop()
     else if ((readString != String(speed)) && (readString.toInt() >= 0) && (readString.toInt() <= 255)) {
         // Update speed value
         speed = readString.toInt();
+
+
     }
+
+    delay(100); // Small delay before next loop iteration
 }
