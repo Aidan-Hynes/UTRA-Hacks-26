@@ -48,7 +48,7 @@ export default function Home() {
             <header className="h-14 border border-white/10 rounded-lg bg-black/40 backdrop-blur flex items-center justify-between px-4">
                 <div className="flex items-center gap-2">
                     <Disc className={`w-6 h-6 text-cyan-400 ${isMatchActive ? 'animate-spin' : 'animate-spin-slow'}`} />
-                    <span className="font-bold tracking-widest text-lg">WINTEROPS // COMMAND</span>
+                    <span className="font-bold tracking-widest text-lg">OLYMPUS // COMMAND</span>
                 </div>
 
                 <nav className="flex gap-6 text-xs font-mono">

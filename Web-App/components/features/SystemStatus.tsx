@@ -33,7 +33,7 @@ export default function SystemStatus() {
         <div className="text-[10px] text-gray-500 animate-pulse">Initializing System Link...</div>
     );
 
-    const ModuleRow = ({ name, icon: Icon, online, latency, extra }: { name: string, icon: any, online: boolean, latency: string, extra?: string }) => (
+    const ModuleRow = ({ name, icon: Icon, online, extra }: { name: string, icon: any, online: boolean, extra?: string }) => (
         <div className="flex items-center justify-between p-2 bg-white/5 border border-white/5 rounded hover:bg-white/10 transition-colors group">
             <div className="flex items-center gap-3">
                 <div className={`p-1.5 rounded bg-black/50 border ${online ? 'border-emerald-500/30 text-emerald-400' : 'border-red-500/30 text-red-500'}`}>
@@ -47,7 +47,6 @@ export default function SystemStatus() {
 
             <div className="flex flex-col items-end gap-0.5">
                 <div className="flex items-center gap-1.5">
-                    <span className="text-[9px] font-mono text-gray-500">{latency}</span>
                     <div className={`w-1.5 h-1.5 rounded-full ${online ? 'bg-emerald-500 shadow-[0_0_5px_#10b981]' : 'bg-red-500 shadow-[0_0_5px_#ef4444]'}`}></div>
                 </div>
                 {online && <Activity className="w-2 h-2 text-emerald-500/50" />}
@@ -70,28 +69,24 @@ export default function SystemStatus() {
                     name="SNOWFLAKE"
                     icon={Database}
                     online={status.snowflake.online}
-                    latency={status.snowflake.latency}
                     extra="DATA_WAREHOUSE"
                 />
                 <ModuleRow
                     name="GEMINI AI"
                     icon={Cpu}
                     online={status.gemini.online}
-                    latency={status.gemini.latency}
                     extra="NEURAL_ENGINE"
                 />
                 <ModuleRow
                     name="ELEVENLABS"
                     icon={Activity}
                     online={status.elevenlabs.online}
-                    latency={status.elevenlabs.latency}
                     extra="VOICE_SYNTH"
                 />
                 <ModuleRow
                     name="DIGITALOCEAN"
                     icon={Server}
                     online={status.digitalocean.online}
-                    latency={status.digitalocean.latency}
                     extra={status.digitalocean.online ? status.digitalocean.ip : "DROPLET_OFFLINE"}
                 />
             </div>

@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono' })
 
 export const metadata: Metadata = {
-    title: 'WinterOps Mission Control',
+    title: 'Olympus Command - Biathlon',
     description: 'Tactical Biathlon Dashboard',
 }
 
