@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Maximize2, Minimize2, Power } from "lucide-react";
+import { Maximize2, Minimize2, Power, Volume2 } from "lucide-react";
 
 // CONFIGURATION
 const STREAM_URL = "http://192.168.38.209:81/stream"; // Your ESP32 IP
@@ -27,6 +27,7 @@ export default function TeslaVision({ isMatchActive }: TeslaVisionProps) {
     // const [isMatchActive, setIsMatchActive] = useState(false); // PROPPED INSTEAD
     const [targetVisible, setTargetVisible] = useState(false);
     const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [isSpeaking, setIsSpeaking] = useState(false);
 
     const videoRef = useRef<HTMLImageElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -57,16 +58,40 @@ export default function TeslaVision({ isMatchActive }: TeslaVisionProps) {
         return () => clearInterval(analyzeInterval);
     }, [isMatchActive, isPlaying]);
 
-    // [STEP 3 PLACEHOLDER] VOICE INTEGRATION
+    // [STEP 3] VOICE INTEGRATION
     useEffect(() => {
         if (!lastCue) return;
-
-        // TODO: Send 'lastCue' to ElevenLabs API
-        console.log("🔊 PLAYING AUDIO:", lastCue);
-
-        // Mock usage:
-        // playAudio(lastCue);
+        playAudio(lastCue);
     }, [lastCue]);
+
+    const playAudio = async (text: string) => {
+        if (!text || isSpeaking) return;
+
+        try {
+            // Optimistic UI
+            setIsSpeaking(true);
+
+            const res = await fetch("/api/voice/speak", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text }),
+            });
+
+            if (!res.ok) throw new Error("Audio generation failed");
+
+            const blob = await res.blob();
+            const audio = new Audio(URL.createObjectURL(blob));
+
+            audio.onended = () => setIsSpeaking(false);
+            audio.onerror = () => setIsSpeaking(false);
+
+            await audio.play();
+
+        } catch (e) {
+            console.error("Audio Error:", e);
+            setIsSpeaking(false);
+        }
+    };
 
     const analyzeFrame = async () => {
         const img = videoRef.current;
@@ -272,6 +297,14 @@ export default function TeslaVision({ isMatchActive }: TeslaVisionProps) {
                             <div className="flex items-center gap-2 px-2 py-0.5 rounded border border-blue-500/30 bg-blue-500/10 backdrop-blur-md">
                                 <div className="animate-spin h-3 w-3 border-2 border-blue-400 border-t-transparent rounded-full"></div>
                                 <span className="text-[10px] font-mono text-blue-300">THINKING...</span>
+                            </div>
+                        )}
+
+                        {/* SPEAKING INDICATOR */}
+                        {isSpeaking && (
+                            <div className="flex items-center gap-2 px-2 py-0.5 rounded border border-purple-500/30 bg-purple-500/10 backdrop-blur-md">
+                                <Volume2 className="w-3 h-3 text-purple-400 animate-pulse" />
+                                <span className="text-[10px] font-mono text-purple-300">SPEAKING...</span>
                             </div>
                         )}
 
