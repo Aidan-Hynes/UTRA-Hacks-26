@@ -15,7 +15,7 @@ public:
 private:
 	MD_TCS230 sensor;
 	sensorData rawData;
-	int _S0, _S1, _S2, _S3, _OE, _OUT;
+	int _S0, _S1, _S2, _S3, _OUT;
 };
 
 #endif // COLOUR_SENSING_H

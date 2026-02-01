@@ -18,7 +18,12 @@ void setup()
 
 void loop()
 {
-    ColourSensing colourSensor(4, 5, 6, 7, 8); // Example pin assignments
+   
+
+    ColourSensing colourSensor(4, 5, 6, 7, 9);
+
+    colourSensor.begin();
+    colourSensor.readSensor(); // Example pin assignments
 
     String readString = "";
   // Check if any data is available to read from the serial port
