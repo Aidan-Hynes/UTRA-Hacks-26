@@ -1,16 +1,19 @@
 "use client";
 
-import { Activity, Battery, Wifi, Shield, Disc, Map, Layout, Zap } from "lucide-react";
+import { Activity, Battery, Wifi, Shield, Disc, Map, Layout, Zap, Play, Square } from "lucide-react";
 import Link from 'next/link';
+import { useState } from 'react';
 import TeslaVision from "../components/features/TeslaVision";
 
 export default function Home() {
+    const [isMatchActive, setIsMatchActive] = useState(false);
+
     return (
         <main className="h-screen w-full bg-[#0a0a0a] text-white flex flex-col p-2 gap-2">
             {/* Header */}
             <header className="h-14 border border-white/10 rounded-lg bg-black/40 backdrop-blur flex items-center justify-between px-4">
                 <div className="flex items-center gap-2">
-                    <Disc className="w-6 h-6 text-cyan-400 animate-spin-slow" />
+                    <Disc className={`w-6 h-6 text-cyan-400 ${isMatchActive ? 'animate-spin' : 'animate-spin-slow'}`} />
                     <span className="font-bold tracking-widest text-lg">WINTEROPS // COMMAND</span>
                 </div>
 
@@ -21,6 +24,12 @@ export default function Home() {
                 </nav>
 
                 <div className="flex items-center gap-4 text-xs font-mono">
+                    {isMatchActive && (
+                        <div className="flex items-center gap-1 text-red-500 animate-pulse">
+                            <div className="w-2 h-2 bg-red-500 rounded-full" />
+                            <span>MATCH LIVE</span>
+                        </div>
+                    )}
                     <div className="flex items-center gap-1 text-green-400">
                         <Wifi className="w-3 h-3" />
                         <span>ONLINE</span>
@@ -76,7 +85,28 @@ export default function Home() {
                         <Shield className="w-4 h-4" /> MISSION CONTROL
                     </h2>
 
-                    <button className="w-full py-3 bg-red-500/10 border border-red-500/50 text-red-500 font-mono text-xs hover:bg-red-500 hover:text-white transition-all rounded">
+                    {/* Start/Stop Match Button */}
+                    <button
+                        onClick={() => setIsMatchActive(!isMatchActive)}
+                        className={`w-full py-4 font-mono text-sm tracking-widest border transition-all rounded flex items-center justify-center gap-2 relative overflow-hidden group
+                            ${isMatchActive
+                                ? 'bg-red-500/20 border-red-500/50 text-red-500 hover:bg-red-500/30'
+                                : 'bg-emerald-500/20 border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/30'
+                            }`}
+                    >
+                        {isMatchActive ? (
+                            <>
+                                <span className="relative z-10">STOP MATCH</span>
+                                <div className="absolute inset-0 bg-red-500/10 animate-pulse" />
+                            </>
+                        ) : (
+                            <>
+                                <span className="relative z-10">START MATCH</span>
+                            </>
+                        )}
+                    </button>
+
+                    <button className="w-full py-2 bg-red-900/10 border border-red-900/30 text-red-700/70 font-mono text-xs hover:bg-red-900/30 hover:text-red-500 transition-all rounded">
                         EMERGENCY STOP
                     </button>
 
