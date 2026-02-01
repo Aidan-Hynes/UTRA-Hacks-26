@@ -4,6 +4,7 @@ import { Activity, Battery, Wifi, Shield, Disc, Map, Layout, Zap, Play, Square, 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import TeslaVision from "../components/features/TeslaVision";
+import SystemStatus from "../components/features/SystemStatus";
 
 export default function Home() {
     const [isMatchActive, setIsMatchActive] = useState(false);
@@ -169,20 +170,9 @@ export default function Home() {
                         EMERGENCY STOP
                     </button>
 
-                    <div className="mt-auto">
-                        <div className="text-[10px] text-gray-500 mb-2">ACTIVE MODULES</div>
-                        <div className="space-y-2">
-                            <div className="flex items-center justify-between text-xs p-2 bg-white/5 rounded">
-                                <span>SNOWFLAKE</span>
-                                <span className="text-green-400">●</span>
-                            </div>
-                            <div className="flex items-center justify-between text-xs p-2 bg-white/5 rounded">
-                                <span>SOLANA</span>
-                                <span className="text-green-400">●</span>
-                            </div>
-                        </div>
-                    </div>
+                    <SystemStatus />
                 </div>
+
 
                 {/* BOTTOM CENTER: Logs */}
                 <div className="col-span-6 row-span-2 bg-black/40 border border-white/10 rounded-lg p-3 font-mono text-[10px] text-gray-400 overflow-y-auto flex flex-col-reverse">
@@ -194,6 +184,6 @@ export default function Home() {
                 </div>
 
             </div>
-        </main>
+        </main >
     )
 }
