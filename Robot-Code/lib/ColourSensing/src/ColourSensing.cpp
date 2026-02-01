@@ -2,8 +2,6 @@
 #include "ColourSensing.h"
 
 
-
-
 ColourSensing::ColourSensing(int s0Pin, int s1Pin, int s2Pin, int s3Pin, int outPin)
 {
     pinMode(s0Pin, OUTPUT);
