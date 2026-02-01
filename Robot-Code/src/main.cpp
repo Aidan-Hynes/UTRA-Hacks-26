@@ -150,6 +150,7 @@ void setup() {
 void loop() {
     ColourSensing::rgb colour;
     colour = getAverageColour(5);
+    float dist;
 
     switch (currState)
     {
@@ -159,7 +160,7 @@ void loop() {
         currState = OBSTACLE_COURSE;
         break;
     case OBSTACLE_COURSE:
-        if (colour.r < 60 && colour.g < 80 && colour.b > 80) {
+        if (colourSensor.getClosestColour(colour, dist) == ColourSensing::COLOUR_BLUE) {
             Serial.println("Box detected!");
             currState = PICKING_UP_BOX;
             motors.stop();
@@ -167,7 +168,7 @@ void loop() {
             currState = OBSTACLE_COURSE_W_BOX;
             break;
         }
-        if (colour.r < 30 && colour.g < 60 && colour.b < 30) {
+        if (colourSensor.getClosestColour(colour, dist) == ColourSensing::COLOUR_GREEN) {
             Serial.println("Target zone detected!");
             currState = TARGET_COURSE;
             motors.stop();
@@ -182,7 +183,7 @@ void loop() {
         }
         break;
     case OBSTACLE_COURSE_W_BOX:
-        if (colour.r < 60 && colour.g < 80 && colour.b > 80) {
+        if (colourSensor.getClosestColour(colour, dist) == ColourSensing::COLOUR_BLUE) {
             Serial.println("Box drop-off detected!");
             currState = DROPPING_OFF_BOX;
             motors.stop();
